@@ -21,7 +21,7 @@ router.get('/getRoute/:id', async function(req, resp, next) {
     mongo.connect(url, function(err, db) {
         if (err) throw err;
         var dbo = db.db("xlparser");
-        dbo.collection("routes").find({}).project({_id}).toArray( function(err, res) {
+        dbo.collection("routes").find({}).project({_id:_id}).toArray( function(err, res) {
             if (err) throw err;
             console.log(res);
             resp.send(res);
