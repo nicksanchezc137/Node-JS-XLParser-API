@@ -1,7 +1,9 @@
 var express = require('express');
 var router = express.Router();
 var mongo = require('mongodb').MongoClient;
-const {ObjectId} = require('mongodb')
+const {ObjectId} = require('mongodb');
+var bodyParser = require('body-parser');
+app.use(bodyParser());
 
 router.use(function (req, res, next) {
     res.header("Access-Control-Allow-Origin", "*");
