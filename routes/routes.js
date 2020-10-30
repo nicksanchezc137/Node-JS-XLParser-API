@@ -3,6 +3,7 @@ var router = express.Router();
 var mongo = require('mongodb').MongoClient;
 const {ObjectId} = require('mongodb');
 var bodyParser = require('body-parser');
+var app = express();
 app.use(bodyParser());
 
 router.use(function (req, res, next) {
