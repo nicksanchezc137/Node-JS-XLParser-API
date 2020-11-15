@@ -36,27 +36,65 @@ router.get("/getUser", function (req, resp, next) {
   }
 });
 
-
-
-//Drop Collection
-router.post("/saveUser", async function (req, resp, next) {
-  var route = req.body;
-  
+//check if user exists
+function checkIfExists(email, phone, callback) {
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
       var dbo = db.db("xlparser");
-      dbo.collection("users").insertOne(route, function (err, res) {
-        if (err) throw err;
-        console.log("1 document inserted", res);
-        db.close();
-        resp.send(res.ops[0]);
-      });
+      dbo
+        .collection("users")
+        .find({
+          $or: [
+            {
+              email,
+            },
+            {
+              phone,
+            },
+          ],
+        })
+        .toArray(function (err, res) {
+          if (err) {
+            callback([],true);
+          }
+          console.log(res);
+          callback(res),false;
+        });
     });
   } catch (err) {
     console.log(err);
   }
-});
+}
 
+//Drop Collection
+router.post("/saveUser", async function (req, resp, next) {
+  var user = req.body;
+
+  checkIfExists(user.email, user.phone, (fetched_users,err) => {
+    if(err){
+      resp.send({status:0,message:"error occurred fetching user"});
+      return;
+    }
+    if(fetched_users.length){
+      resp.send({status:0,message:"user already exists!"});
+      return;
+    }
+    try {
+      mongo.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("xlparser");
+        dbo.collection("users").insertOne(user, function (err, res) {
+          if (err) throw err;
+          console.log("1 document inserted", res);
+          db.close();
+          resp.send({status:1,message:res.ops[0]});
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+});
 
 module.exports = router;
