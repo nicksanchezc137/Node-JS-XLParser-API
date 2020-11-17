@@ -19,27 +19,103 @@ router.get("/getUser", function (req, resp, next) {
   let uid = req.query.uid;
   try {
     mongo.connect(url, function (err, db) {
-      if (err){
-        resp.send({status:0,message:"Error:Error occured connecting",response:{}});
+      if (err) {
+        resp.send({
+          status: 0,
+          message: "Error:Error occured connecting",
+          response: {},
+        });
       }
       var dbo = db.db("xlparser");
       dbo
         .collection("users")
-        .find({ uid})
+        .find({ uid })
         .toArray(function (err, res) {
-          if (err){
-            resp.send({status:0,message:"Error:"+res,response:{}});
+          if (err) {
+            resp.send({ status: 0, message: "Error:" + res, response: {} });
           }
           console.log(res);
-          resp.send({status:1,message:res[0]?"Success":"No such user", response:res[0]});
-        })
+          resp.send({
+            status: 1,
+            message: res[0] ? "Success" : "No such user",
+            response: res[0],
+          });
+        });
     });
   } catch (err) {
     console.log(err);
-    resp.send({status:0,message:"Error:"+err,response:{}});
+    resp.send({ status: 0, message: "Error:" + err, response: {} });
   }
 });
 
+/* GET List item*/
+router.post("/updateLocationDetails", function (req, resp, next) {
+  let uid = req.body.uid;
+  let current_location = req.body.current_location;
+
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) {
+        resp.send({
+          status: 0,
+          message: "Error:Error occured connecting",
+          response: {},
+        });
+      }
+      var dbo = db.db("xlparser");
+      var myquery = { uid };
+      var newvalues = { $set: { current_location } };
+      dbo
+        .collection("users")
+        .updateOne(myquery, newvalues, function (err, res) {
+          if (err) throw err;
+          resp.send({
+            status: 1,
+            message: "Rider Details Updated",
+            response: current_location,
+          });
+          db.close();
+        });
+    });
+  } catch (err) {
+    console.log(err);
+    resp.send({ status: 0, message: "Error:" + err, response: {} });
+  }
+});
+/* GET List item*/
+router.post("/updateUserNotification", function (req, resp, next) {
+  let uid = req.body.uid;
+  let device_notification_id = req.body.device_notification_id;
+
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) {
+        resp.send({
+          status: 0,
+          message: "Error:Error occured connecting",
+          response: {},
+        });
+      }
+      var dbo = db.db("xlparser");
+      var myquery = { uid };
+      var newvalues = { $set: { device_notification_id } };
+      dbo
+        .collection("users")
+        .updateOne(myquery, newvalues, function (err, res) {
+          if (err) throw err;
+          resp.send({
+            status: 1,
+            message: "User Details Updated",
+            response: device_notification_id,
+          });
+          db.close();
+        });
+    });
+  } catch (err) {
+    console.log(err);
+    resp.send({ status: 0, message: "Error:" + err, response: {} });
+  }
+});
 //check if user exists
 function checkIfExists(email, phone, callback) {
   try {
@@ -60,10 +136,10 @@ function checkIfExists(email, phone, callback) {
         })
         .toArray(function (err, res) {
           if (err) {
-            callback([],true);
+            callback([], true);
           }
           console.log(res);
-          callback(res),false;
+          callback(res), false;
         });
     });
   } catch (err) {
@@ -75,13 +151,17 @@ function checkIfExists(email, phone, callback) {
 router.post("/saveUser", async function (req, resp, next) {
   var user = req.body;
 
-  checkIfExists(user.email, user.phone, (fetched_users,err) => {
-    if(err){
-      resp.send({status:0,message:"error occurred fetching user",response:{}});
+  checkIfExists(user.email, user.phone, (fetched_users, err) => {
+    if (err) {
+      resp.send({
+        status: 0,
+        message: "error occurred fetching user",
+        response: {},
+      });
       return;
     }
-    if(fetched_users.length){
-      resp.send({status:0,message:"user already exists!", response:{}});
+    if (fetched_users.length) {
+      resp.send({ status: 0, message: "user already exists!", response: {} });
       return;
     }
     try {
@@ -92,7 +172,11 @@ router.post("/saveUser", async function (req, resp, next) {
           if (err) throw err;
           console.log("1 document inserted", res);
           db.close();
-          resp.send({status:1,response:res.ops[0],message:"User created!"});
+          resp.send({
+            status: 1,
+            response: res.ops[0],
+            message: "User created!",
+          });
         });
       });
     } catch (err) {
