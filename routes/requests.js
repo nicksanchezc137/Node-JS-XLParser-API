@@ -43,6 +43,26 @@ router.get("/getRequest", function (req, resp, next) {
   }
 });
 
+router.get("/getRiderRequests", function (req, resp, next) {
+  let uid = req.query.uid;
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) throw err;
+      var dbo = db.db("xlparser");
+      dbo
+        .collection("requests")
+        .find({ assigned_rider_uid: uid })
+        .toArray(function (err, res) {
+          if (err) throw err;
+          console.log(res);
+          resp.send(res);
+        });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+});
+
 const createNotification = (device_id,callback) => {
   //create notification
   const notification = {
@@ -77,10 +97,11 @@ router.post("/saveRequest", async function (req, resp, next) {
         console.log("1 document inserted");
         db.close();
        
-        fetchAvailableRiders(req.body.pick_up_coordinates, (res) => {
+        fetchAvailableRiders(req.body.pick_up_coordinates, (resp) => {
           console.log("res>>>", res);
           if(res.length){
-            createNotification(res[0].device_id,(notif)=>{
+            assignRequestToRider(res.ops[0]._id,resp[0].uid);
+            createNotification(resp[0].device_id,(notif)=>{
               console.log("notif", notif)
               resp.send({status:1,response:"Notification sent",message:"Success"});
               });
@@ -127,6 +148,32 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
               a.pick_up_distance > b.pick_up_distance ? 1 : -1
             )
           );
+        });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+function assignRequestToRider(_id,assigned_rider_uid){
+
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) {
+        resp.send({
+          status: 0,
+          message: "Error:Error occured connecting",
+          response: {},
+        });
+      }
+      var dbo = db.db("xlparser");
+      var myquery = { _id:ObjectId(_id) };
+      var newvalues = { $set: { assigned_rider_uid } };
+      dbo
+        .collection("requests")
+        .updateOne(myquery, newvalues, function (err, res) {
+          if (err) throw err;
+          console.log(_id," request assigned to rider ",assigned_rider_uid)
+          db.close();
         });
     });
   } catch (err) {
