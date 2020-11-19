@@ -76,14 +76,18 @@ router.post("/saveRequest", async function (req, resp, next) {
         if (err) throw err;
         console.log("1 document inserted", res);
         db.close();
-        resp.send(res.ops[0]);
+       
         fetchAvailableRiders(req.body.pick_up_coordinates, (res) => {
           console.log("res>>>", res);
-          //createNotification(notification, () => {});
-          createNotification(res[0].device_id,(notif)=>{
-          console.log("notif", notif)
-
-          });
+          if(res.length){
+            createNotification(res[0].device_id,(notif)=>{
+              console.log("notif", notif)
+              resp.send({status:1,response:"Notification sent",message:"Success"});
+              });
+          }else{
+            resp.send({status:0,response:"No rider available",message:"Failed"});
+          }
+       
         });
       });
     });
