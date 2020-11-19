@@ -99,7 +99,7 @@ router.post("/saveRequest", async function (req, resp, next) {
        
         fetchAvailableRiders(req.body.pick_up_coordinates, (res_) => {
           console.log("res>>>", res_);
-          if(res.length){
+          if(res_.length){
             assignRequestToRider(res_.ops[0]._id,res_[0].uid);
             createNotification(res_[0].device_id,(notif)=>{
               console.log("notif", notif)
