@@ -74,7 +74,7 @@ router.post("/saveRequest", async function (req, resp, next) {
       var dbo = db.db("xlparser");
       dbo.collection("requests").insertOne(route, function (err, res) {
         if (err) throw err;
-        console.log("1 document inserted", res);
+        console.log("1 document inserted");
         db.close();
        
         fetchAvailableRiders(req.body.pick_up_coordinates, (res) => {
@@ -105,7 +105,7 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
         .collection("users")
         .find({ type: "2" })
         .toArray(function (err, res) {
-          // console.log("res-->", JSON.stringify(res));
+           console.log("all riders", JSON.stringify(res));
           //get the disance between
           //filter the riders with no coordinates
           let valid_riders = res.filter((rider)=>rider.hasOwnProperty('current_location'));
