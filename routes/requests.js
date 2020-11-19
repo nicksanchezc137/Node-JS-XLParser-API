@@ -97,11 +97,11 @@ router.post("/saveRequest", async function (req, resp, next) {
         console.log("1 document inserted");
         db.close();
        
-        fetchAvailableRiders(req.body.pick_up_coordinates, (resp) => {
-          console.log("res>>>", res);
+        fetchAvailableRiders(req.body.pick_up_coordinates, (res_) => {
+          console.log("res>>>", res_);
           if(res.length){
-            assignRequestToRider(res.ops[0]._id,resp[0].uid);
-            createNotification(resp[0].device_id,(notif)=>{
+            assignRequestToRider(res_.ops[0]._id,res_[0].uid);
+            createNotification(res_[0].device_id,(notif)=>{
               console.log("notif", notif)
               resp.send({status:1,response:"Notification sent",message:"Success"});
               });
