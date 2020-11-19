@@ -103,8 +103,10 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
         .toArray(function (err, res) {
           // console.log("res-->", JSON.stringify(res));
           //get the disance between
-
-          let available_riders = res.map((rider) => {
+          //filter the riders with no coordinates
+          let valid_riders = res.filter((rider)=>rider.hasOwnProperty('current_location'));
+          console.log("valid_riders-->", valid_riders)
+          let available_riders = valid_riders.map((rider) => {
             return {
               uid: rider.uid,
               device_id:rider.device_notification_id,
