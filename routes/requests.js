@@ -75,7 +75,7 @@ const createNotification = (device_id,callback) => {
   client
     .createNotification(notification)
     .then((response) => {
-      console.log("createNotification -> response", response);
+      console.log("createNotification -> response", response.statusCode);
       callback(true);
     })
     .catch((e) => {
