@@ -45,6 +45,7 @@ router.get("/getRequest", function (req, resp, next) {
 
 router.get("/getRiderRequests", function (req, resp, next) {
   let uid = req.query.uid;
+  console.log("uid", uid)
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
@@ -54,7 +55,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
         .find({ assigned_rider_uid: uid })
         .toArray(function (err, res) {
           if (err) throw err;
-          console.log(res);
+          //console.log(res);
           resp.send(res);
         });
     });
@@ -64,6 +65,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
 });
 
 const createNotification = (device_id,callback) => {
+  console.log("createNotification -> device_id", device_id)
   //create notification
   const notification = {
     contents: {
@@ -87,6 +89,7 @@ const createNotification = (device_id,callback) => {
 //Drop Collection
 router.post("/saveRequest", async function (req, resp, next) {
   var route = req.body;
+  route.date = new Date()
 
   try {
     mongo.connect(url, function (err, db) {
