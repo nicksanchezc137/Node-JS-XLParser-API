@@ -4,11 +4,8 @@ var mongo = require("mongodb").MongoClient;
 const { ObjectId } = require("mongodb");
 var bodyParser = require("body-parser");
 const mongoose = require("mongoose");
-const OneSignal = require("onesignal-node");
-const client = new OneSignal.Client(
-  "34f658cc-57c6-4277-a09c-f8d16e888f43",
-  "MDAxMWZlNTgtMTk1Yy00YjVlLTkyMmYtNmEwNmNmZjViNGMz"
-);
+const { createNotification } = require("../helpers/notification");
+
 
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -64,27 +61,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
   }
 });
 
-const createNotification = (device_id,callback) => {
-  console.log("createNotification -> device_id", device_id)
-  //create notification
-  const notification = {
-    contents: {
-      en: "You have a delivery request",
-    },
-    include_player_ids: [device_id],
-    filters: [],
-  };
-  client
-    .createNotification(notification)
-    .then((response) => {
-      console.log("createNotification -> response", response.statusCode);
-      callback(true);
-    })
-    .catch((e) => {
-      console.log("createNotification -> e", e);
-      callback(false);
-    });
-};
+
 
 //Drop Collection
 router.post("/saveRequest", async function (req, resp, next) {
@@ -103,8 +80,11 @@ router.post("/saveRequest", async function (req, resp, next) {
         fetchAvailableRiders(req.body.pick_up_coordinates, (res_) => {
           console.log("res>>>", res_);
           if(res_.length){
-            assignRequestToRider(res.ops[0]._id,res_[0].uid);
-            createNotification(res_[0].device_id,(notif)=>{
+            let assign_json = res_.map((available_rider,i)=>{return {
+              uid:available_rider.uid, status:i==0?1:0
+            }})
+            assignRequestToRider(res.ops[0]._id,assign_json);
+            createNotification(res_[0].device_id,"You have a new delivery request",(notif)=>{
               console.log("notif", notif)
               resp.send({status:1,response:"Notification sent",message:"Success"});
               });
@@ -157,7 +137,7 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
     console.log(err);
   }
 }
-function assignRequestToRider(_id,assigned_rider_uid){
+function assignRequestToRider(_id,assign_json){
 
   try {
     mongo.connect(url, function (err, db) {
@@ -170,12 +150,12 @@ function assignRequestToRider(_id,assigned_rider_uid){
       }
       var dbo = db.db("xlparser");
       var myquery = { _id:ObjectId(_id) };
-      var newvalues = { $set: { assigned_rider_uid } };
+      var newvalues = { $set: { assign_json } };
       dbo
         .collection("requests")
         .updateOne(myquery, newvalues, function (err, res) {
           if (err) throw err;
-          console.log(_id," request assigned to rider ",assigned_rider_uid)
+          console.log(_id," request assigned to rider ",assign_json)
           db.close();
         });
     });
