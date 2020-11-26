@@ -189,6 +189,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
           if(is_rider){
             //update assign json
             updateRequestAssignJSON(_id,uid,status,(request)=>{
+              console.log("🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request", request)
               //send notification if status is okay
               getUsertById(request.request_initiator_uid,(user)=>{
                 if(status == 2){
