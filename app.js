@@ -12,6 +12,7 @@ var requestsRouter = require("./routes/requests");
 var usersRouter = require("./routes/users");
 var cron = require("node-cron");
 const { getAllRequests } = require("./helpers/requestsHelper");
+const { getUsertById } = require("./helpers/usersHelper");
 
 var app = express();
 
@@ -36,15 +37,9 @@ app.use(function (req, res, next) {
 });
 
 //run every 5 minutes
-cron.schedule("*/5 * * * *", () => {
+cron.schedule("*/1 * * * *", () => {
   console.log("running a task every 5 minutes");
-  // getAllRequests((res) => {
-  //   console.log("🚀 ~ file: app.js ~ line 47 ~ getAllRequests ~ res", res);
-  //   if(res.length){
-  //     //some new requests exist;
 
-  //   }
-  // });
 });
 
 // error handler
