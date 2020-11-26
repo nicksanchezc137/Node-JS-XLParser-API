@@ -34,7 +34,7 @@ function getAllUsers(callback){
 }
 
 function getUsertById(_id,callback){
-  console.log("_id", _id);
+  console.log("user _id", _id);
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
