@@ -3,7 +3,7 @@ var mongo = require("mongodb").MongoClient;
 const { ObjectId } = require("mongodb");
 var url = "mongodb://127.0.0.1:27017/xlparser";
 
-function getAllRequests(callback){
+function getAllUsers(callback){
     try {
         mongo.connect(url, function (err, db) {
           if (err) {
@@ -15,7 +15,7 @@ function getAllRequests(callback){
           }
           var dbo = db.db("xlparser");
           dbo
-            .collection("requests")
+            .collection("users")
             .find({ status:1 })
             .toArray(function (err, res) {
               if (err) {
@@ -33,14 +33,14 @@ function getAllRequests(callback){
       }
 }
 
-function getRequestById(_id,callback){
+function getUsertById(_id,callback){
   console.log("_id", _id);
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
       var dbo = db.db("xlparser");
       dbo
-        .collection("requests")
+        .collection("users")
         .find({ _id: ObjectId(_id) })
         .toArray(function (err, res) {
           if (err) throw err;
@@ -54,4 +54,4 @@ function getRequestById(_id,callback){
 }
 
 
-module.exports = {getAllRequests,getRequestById};
+module.exports = {getUsertById,getAllUsers};

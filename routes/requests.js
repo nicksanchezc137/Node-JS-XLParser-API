@@ -5,6 +5,8 @@ const { ObjectId } = require("mongodb");
 var bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const { createNotification } = require("../helpers/notification");
+const { getRequestById } = require("../helpers/requestsHelper");
+const { getUsertById } = require("../helpers/usersHelper");
 
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -55,15 +57,22 @@ router.get("/getRiderRequests", function (req, resp, next) {
           let rider_request = {};
           res.forEach((request) => {
             if (request.assign_json) {
-              console.log("🚀 ~ file: requests.js ~ line 58 ~ res.forEach ~ request.assign_json", request)
-              if(request.assign_json.filter(
-                (rider) => rider.status == 1 && rider.uid == uid
-              ).length){
+              console.log(
+                "🚀 ~ file: requests.js ~ line 58 ~ res.forEach ~ request.assign_json",
+                request
+              );
+              if (
+                request.assign_json.filter(
+                  (rider) => rider.status == 1 && rider.uid == uid
+                ).length
+              ) {
                 rider_request = request;
-
               }
-              
-              console.log("🚀 ~ file: requests.js ~ line 63 ~ res.forEach ~ rider_request", rider_request)
+
+              console.log(
+                "🚀 ~ file: requests.js ~ line 63 ~ res.forEach ~ rider_request",
+                rider_request
+              );
               if (rider_request.length) {
                 rider_request = rider_request[0];
               }
@@ -126,6 +135,80 @@ router.post("/saveRequest", async function (req, resp, next) {
     });
   } catch (err) {
     console.log(err);
+  }
+});
+function updateRequestAssignJSON(_id, uid,status,callback) {
+  try {
+    getRequestById(_id, (request) => {
+      console.log("🚀 ~ file: requests.js ~ line 142 ~ getRequestById ~ res", request);
+      let assign_json = request.assign_json.map((request)=>{
+        return{
+          uid:request.uid,
+          status:request.uid == uid?status:request.status
+        }
+      })
+      mongo.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("xlparser");
+        var myquery = { _id: ObjectId(_id) };
+        var newvalues = { $set: { assign_json } };
+        dbo
+          .collection("requests")
+          .updateOne(myquery, newvalues, function (err, res) {
+            if (err) throw err;
+            console.log("assign json updated successfully");
+            callback(request);
+            db.close();
+          });
+      });
+    });
+  } catch (err) {}
+}
+//Drop Collection
+router.post("/updateStatusRequest", async function (req, resp, next) {
+  var _id = req.body._id;
+  var status = req.body.status;
+  var is_rider = req.body.is_rider;
+  var uid = req.body.uid;
+  route.date = new Date();
+
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) throw err;
+      var dbo = db.db("xlparser");
+      var myquery = { _id: ObjectId(_id) };
+      var newvalues = { $set: { status } };
+      dbo
+        .collection("requests")
+        .updateOne(myquery, newvalues, function (err, res) {
+          if (err) throw err;
+          db.close();
+          resp.send({
+            status: 1,
+            message: "Update successful",
+            response: {},
+          });
+          if(is_rider){
+            //update assign json
+            updateRequestAssignJSON(_id,uid,status,(request)=>{
+              //send notification if status is okay
+              getUsertById(request.request_initiator_uid,(user)=>{
+                if(status == 2){
+                  createNotification(user.device_id,"Your request has been accepted by a rider");
+  
+                }
+              })
+            
+            })
+          }
+        });
+    });
+  } catch (err) {
+    resp.send({
+      status: 0,
+      message: "Update failed",
+      response: {},
+    });
   }
 });
 
