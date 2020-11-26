@@ -41,7 +41,7 @@ function getUsertById(_id,callback){
       var dbo = db.db("xlparser");
       dbo
         .collection("users")
-        .find({ _id: ObjectId(_id) })
+        .find({ _id: ObjectId("R0oujoFqpOMBAvm29eQHJ2mpOb63") })
         .toArray(function (err, res) {
           if (err) throw err;
           console.log(res);
