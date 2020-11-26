@@ -6,7 +6,6 @@ var bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const { createNotification } = require("../helpers/notification");
 
-
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
   res.header(
@@ -42,31 +41,47 @@ router.get("/getRequest", function (req, resp, next) {
 
 router.get("/getRiderRequests", function (req, resp, next) {
   let uid = req.query.uid;
-  console.log("uid", uid)
+  console.log("uid", uid);
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
       var dbo = db.db("xlparser");
       dbo
         .collection("requests")
-        .find({ assigned_rider_uid: uid })
+        .find({ status: 1 })
         .toArray(function (err, res) {
           if (err) throw err;
           //console.log(res);
-          resp.send(res);
+          let rider_request = {};
+          res.forEach((request) => {
+            if (request.assign_json) {
+              console.log("🚀 ~ file: requests.js ~ line 58 ~ res.forEach ~ request.assign_json", request)
+              if(request.assign_json.filter(
+                (rider) => rider.status == 1 && rider.uid == uid
+              ).length){
+                rider_request = request;
+
+              }
+              
+              console.log("🚀 ~ file: requests.js ~ line 63 ~ res.forEach ~ rider_request", rider_request)
+              if (rider_request.length) {
+                rider_request = rider_request[0];
+              }
+            }
+          });
+          resp.send({ message: "Success", status: 1, request: rider_request });
         });
     });
   } catch (err) {
     console.log(err);
+    resp.send({ message: "An error occured", status: 0, request: {} });
   }
 });
-
-
 
 //Drop Collection
 router.post("/saveRequest", async function (req, resp, next) {
   var route = req.body;
-  route.date = new Date()
+  route.date = new Date();
 
   try {
     mongo.connect(url, function (err, db) {
@@ -76,22 +91,36 @@ router.post("/saveRequest", async function (req, resp, next) {
         if (err) throw err;
         console.log("1 document inserted");
         db.close();
-       
+
         fetchAvailableRiders(req.body.pick_up_coordinates, (res_) => {
           console.log("res>>>", res_);
-          if(res_.length){
-            let assign_json = res_.map((available_rider,i)=>{return {
-              uid:available_rider.uid, status:i==0?1:0
-            }})
-            assignRequestToRider(res.ops[0]._id,assign_json);
-            createNotification(res_[0].device_id,"You have a new delivery request",(notif)=>{
-              console.log("notif", notif)
-              resp.send({status:1,response:"Notification sent",message:"Success"});
-              });
-          }else{
-            resp.send({status:0,response:"No rider available",message:"Failed"});
+          if (res_.length) {
+            let assign_json = res_.map((available_rider, i) => {
+              return {
+                uid: available_rider.uid,
+                status: i == 0 ? 1 : 0,
+              };
+            });
+            assignRequestToRider(res.ops[0]._id, assign_json);
+            createNotification(
+              res_[0].device_id,
+              "You have a new delivery request",
+              (notif) => {
+                console.log("notif", notif);
+                resp.send({
+                  status: 1,
+                  response: "Notification sent",
+                  message: "Success",
+                });
+              }
+            );
+          } else {
+            resp.send({
+              status: 0,
+              response: "No rider available",
+              message: "Failed",
+            });
           }
-       
         });
       });
     });
@@ -109,15 +138,17 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
         .collection("users")
         .find({ type: "2" })
         .toArray(function (err, res) {
-           console.log("all riders", JSON.stringify(res));
+          console.log("all riders", JSON.stringify(res));
           //get the disance between
           //filter the riders with no coordinates
-          let valid_riders = res.filter((rider)=>rider.hasOwnProperty('current_location'));
-          console.log("valid_riders-->", valid_riders)
+          let valid_riders = res.filter((rider) =>
+            rider.hasOwnProperty("current_location")
+          );
+          console.log("valid_riders-->", valid_riders);
           let available_riders = valid_riders.map((rider) => {
             return {
               uid: rider.uid,
-              device_id:rider.device_notification_id,
+              device_id: rider.device_notification_id,
               pick_up_distance: getDistanceFromLatLonInKm(
                 rider.current_location.latitude,
                 rider.current_location.longitude,
@@ -137,8 +168,7 @@ function fetchAvailableRiders(pick_up_coordinates, callback) {
     console.log(err);
   }
 }
-function assignRequestToRider(_id,assign_json){
-
+function assignRequestToRider(_id, assign_json) {
   try {
     mongo.connect(url, function (err, db) {
       if (err) {
@@ -149,13 +179,13 @@ function assignRequestToRider(_id,assign_json){
         });
       }
       var dbo = db.db("xlparser");
-      var myquery = { _id:ObjectId(_id) };
+      var myquery = { _id: ObjectId(_id) };
       var newvalues = { $set: { assign_json } };
       dbo
         .collection("requests")
         .updateOne(myquery, newvalues, function (err, res) {
           if (err) throw err;
-          console.log(_id," request assigned to rider ",assign_json)
+          console.log(_id, " request assigned to rider ", assign_json);
           db.close();
         });
     });
