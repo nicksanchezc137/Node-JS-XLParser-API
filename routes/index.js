@@ -22,4 +22,16 @@ router.post('/deleteById', async function(req, resp, next) {
     }
 });
 
+//Drop Collection
+router.post('/clear', async function(req, resp, next) {
+  var entity = req.body.entity;
+  mongo.connect(url, function(err, db) {
+      if (err) throw err;
+      var dbo = db.db("xlparser");
+      dbo.collection(entity).drop().then((res)=>{
+          resp.send({message:"OK"})
+      })
+    });
+});
+
 module.exports = router;
