@@ -194,7 +194,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
               //send notification if status is okay
               getUsertById(request.request_initiator_uid,(user)=>{
                 if(status == 2){
-                  createNotification(user.device_id,"Your request has been accepted by a rider");
+                  createNotification(user.device_notification_id,"Your request has been accepted by a rider");
   
                 }
               })
