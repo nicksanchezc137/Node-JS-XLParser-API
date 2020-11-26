@@ -170,8 +170,6 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
   var status = req.body.status;
   var is_rider = req.body.is_rider;
   var uid = req.body.uid;
-  route.date = new Date();
-
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
