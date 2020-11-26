@@ -33,7 +33,7 @@ function getAllUsers(callback){
       }
 }
 
-function getUsertById(_id,callback){
+function getUsertById2(_id,callback){
   console.log("user _id", _id);
   try {
     mongo.connect(url, function (err, db) {
@@ -41,11 +41,32 @@ function getUsertById(_id,callback){
       var dbo = db.db("xlparser");
       dbo
         .collection("users")
-        .find({ _id: ObjectId("R0oujoFqpOMBAvm29eQHJ2mpOb63") })
+        .find({ _id: ObjectId(_id) })
         .toArray(function (err, res) {
           if (err) throw err;
           console.log(res);
           callback(res);
+        });
+    });
+  } catch (err) {
+    console.log(err);
+  }
+}
+function getUsertById(_id, callback) {
+  console.log("_id", _id);
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) throw err;
+      var dbo = db.db("xlparser");
+      dbo
+        .collection("users")
+        .find({ _id: ObjectId(_id) })
+        .toArray(function (err, res) {
+          if (err) throw err;
+          console.log(res);
+          if (res.length) {
+            callback(res[0]);
+          }
         });
     });
   } catch (err) {
