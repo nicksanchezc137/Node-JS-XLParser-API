@@ -45,7 +45,7 @@ function getUsertById(_id,callback){
         .toArray(function (err, res) {
           if (err) throw err;
           console.log(res);
-          callback();
+          callback(res);
         });
     });
   } catch (err) {
