@@ -191,7 +191,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
             updateRequestAssignJSON(_id,uid,status,(request)=>{
               console.log("🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request", request)
               //send notification if status is okay
-              getUsertById(request.request_initiator_uid.toString(),(user)=>{
+              getUsertById(request.request_initiator_uid,(user)=>{
                 if(status == 2){
                   createNotification(user.device_notification_id,"Your request has been accepted by a rider");
   
