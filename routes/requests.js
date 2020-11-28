@@ -272,7 +272,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                         assign_json[i].status = 4;
                       }
                     });
-                    getUsertByUID(next_rider_uid, (rider) => {
+                    getUsertByUID(request.request_initiator_uid, (rider) => {
                       //assign json update
                       assignRequestToRider(_id, assign_json);
                       createNotification(
