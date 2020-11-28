@@ -50,7 +50,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
       var dbo = db.db("xlparser");
       dbo
         .collection("requests")
-        .find({ status: 1 })
+        .find()
         .toArray(function (err, res) {
           if (err) throw err;
           //console.log(res);
