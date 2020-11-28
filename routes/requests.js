@@ -53,7 +53,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
         .find()
         .toArray(function (err, res) {
           if (err) throw err;
-          //console.log(res);
+          console.log(res);
           let rider_request = {};
           res.forEach((request) => {
             if (request.assign_json) {
