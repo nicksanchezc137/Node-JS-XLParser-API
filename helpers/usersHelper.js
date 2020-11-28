@@ -47,6 +47,8 @@ function getUsertByUID(uid, callback) {
           console.log(res);
           if (res.length) {
             callback(res[0]);
+          }else{
+            callback([])
           }
         });
     });

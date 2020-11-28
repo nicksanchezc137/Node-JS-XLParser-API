@@ -137,16 +137,19 @@ router.post("/saveRequest", async function (req, resp, next) {
     console.log(err);
   }
 });
-function updateRequestAssignJSON(_id, uid,status,callback) {
+function updateRequestAssignJSON(_id, uid, status, callback) {
   try {
     getRequestById(_id, (request) => {
-      console.log("🚀 ~ file: requests.js ~ line 142 ~ getRequestById ~ res", request);
-      let assign_json = request.assign_json.map((request)=>{
-        return{
-          uid:request.uid,
-          status:request.uid == uid?status:request.status
-        }
-      })
+      console.log(
+        "🚀 ~ file: requests.js ~ line 142 ~ getRequestById ~ res",
+        request
+      );
+      let assign_json = request.assign_json.map((request) => {
+        return {
+          uid: request.uid,
+          status: request.uid == uid ? status : request.status,
+        };
+      });
       mongo.connect(url, function (err, db) {
         if (err) throw err;
         var dbo = db.db("xlparser");
@@ -181,27 +184,88 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
         .updateOne(myquery, newvalues, function (err, res) {
           if (err) throw err;
           db.close();
-          resp.send({
-            status: 1,
-            message: "Update successful",
-            response: {},
-          });
-          if(is_rider){
-            //update assign json
-            updateRequestAssignJSON(_id,uid,status,(request)=>{
-              console.log("🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request", request)
-              //send notification if status is okay
-              getUsertByUID(request.request_initiator_uid,(user)=>{
-                if(status == 2){
-                  createNotification(user.device_notification_id,"Your request has been accepted by a rider",(res)=>{
-                  console.log("🚀 ~ file: requests.js ~ line 197 ~ createNotification ~ res", res)
 
+          if (is_rider) {
+            //update assign json
+            updateRequestAssignJSON(_id, uid, status, (request) => {
+              console.log(
+                "🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request",
+                request
+              );
+              //send notification if status is okay
+              getUsertByUID(request.request_initiator_uid, (user) => {
+                if (status == 2) {
+                  resp.send({
+                    status: 1,
+                    message: "Update successful",
+                    response: {},
                   });
-  
+                  createNotification(
+                    user.device_notification_id,
+                    "Your request has been accepted by a rider",
+                    (res) => {
+                      console.log(
+                        "🚀 ~ file: requests.js ~ line 197 ~ createNotification ~ res",
+                        res
+                      );
+                    }
+                  );
+                } else if (status == 3) {
+                  //rider has rejected the ride
+                  //assign to next rider on the queue
+                  getRequestById(_id, (request) => {
+                    let assign_json = request.assign_json;
+                    if (assign_json.length == 1) {
+                      resp.send({
+                        status: 0,
+                        message: "No riders available",
+                        response: {},
+                      });
+                    } else {
+                      let another_rider_available = false;
+                      let next_rider_uid = "";
+                      assign_json.forEach((rider, i) => {
+                        if (rider.status == 3) {
+                          //assign to the next in queue
+                          if (i + 1 < assign_json.length) {
+                            assign_json[i + 1].status = 2;
+                            another_rider_available = true;
+                            next_rider_uid = assign_json[i+1].uid;
+                          }
+                        }
+                      });
+                      if (another_rider_available) {
+                        getUsertByUID(next_rider_uid,(rider)=>{
+                            //assign json update
+                        assignRequestToRider(_id, assign_json);
+                        createNotification(
+                          rider.device_notification_id,
+                          "You have a new delivery request",
+                          (notif) => {
+                            console.log("notif", notif);
+                            resp.send({
+                              status: 1,
+                              response: "Notification sent",
+                              message: "Success",
+                            });
+                          }
+                        );
+
+                        });
+                      
+                      }else{
+                        //no rider left on queue
+                        resp.send({
+                          status: 0,
+                          message: "No riders available",
+                          response: {},
+                        });
+                      }
+                    }
+                  });
                 }
-              })
-            
-            })
+              });
+            });
           }
         });
     });
