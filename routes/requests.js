@@ -6,7 +6,7 @@ var bodyParser = require("body-parser");
 const mongoose = require("mongoose");
 const { createNotification } = require("../helpers/notification");
 const { getRequestById } = require("../helpers/requestsHelper");
-const { getUsertById } = require("../helpers/usersHelper");
+const { getUsertByUID } = require("../helpers/usersHelper");
 
 router.use(function (req, res, next) {
   res.header("Access-Control-Allow-Origin", "*");
@@ -191,7 +191,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
             updateRequestAssignJSON(_id,uid,status,(request)=>{
               console.log("🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request", request)
               //send notification if status is okay
-              getUsertById(request.request_initiator_uid,(user)=>{
+              getUsertByUID(request.request_initiator_uid,(user)=>{
                 if(status == 2){
                   createNotification(user.device_notification_id,"Your request has been accepted by a rider",(res)=>{
                   console.log("🚀 ~ file: requests.js ~ line 197 ~ createNotification ~ res", res)

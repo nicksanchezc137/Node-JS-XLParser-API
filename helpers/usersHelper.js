@@ -33,15 +33,15 @@ function getAllUsers(callback) {
   }
 }
 
-function getUsertById(_id, callback) {
-  console.log("user _id", _id);
+function getUsertByUID(uid, callback) {
+  console.log("user _id", uid);
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
       var dbo = db.db("xlparser");
       dbo
         .collection("users")
-        .find({ _id: ObjectId(_id.trim()) })
+        .find({ uid })
         .toArray(function (err, res) {
           if (err) throw err;
           console.log(res);
@@ -55,4 +55,4 @@ function getUsertById(_id, callback) {
   }
 }
 
-module.exports = { getUsertById, getAllUsers };
+module.exports = { getUsertByUID, getAllUsers };
