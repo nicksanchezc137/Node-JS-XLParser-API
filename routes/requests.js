@@ -217,7 +217,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                     let assign_json = request.assign_json;
                     if (assign_json.length == 1) {
                       resp.send({
-                        status: 0,
+                        status: 1,
                         message: "No riders available",
                         response: {},
                       });
@@ -256,7 +256,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                       }else{
                         //no rider left on queue
                         resp.send({
-                          status: 0,
+                          status: 1,
                           message: "No riders available",
                           response: {},
                         });
