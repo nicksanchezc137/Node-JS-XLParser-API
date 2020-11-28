@@ -63,8 +63,9 @@ router.get("/getRiderRequests", function (req, resp, next) {
               );
               if (
                 request.assign_json.filter(
-                  (rider) => (rider.status == 1 || rider.status == 2) && rider.uid == uid
-                ).length 
+                  (rider) =>
+                    (rider.status == 1 || rider.status == 2) && rider.uid == uid
+                ).length
               ) {
                 rider_request = request;
               }
@@ -230,30 +231,28 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                           if (i + 1 < assign_json.length) {
                             assign_json[i + 1].status = 2;
                             another_rider_available = true;
-                            next_rider_uid = assign_json[i+1].uid;
+                            next_rider_uid = assign_json[i + 1].uid;
                           }
                         }
                       });
                       if (another_rider_available) {
-                        getUsertByUID(next_rider_uid,(rider)=>{
-                            //assign json update
-                        assignRequestToRider(_id, assign_json);
-                        createNotification(
-                          rider.device_notification_id,
-                          "You have a new delivery request",
-                          (notif) => {
-                            console.log("notif", notif);
-                            resp.send({
-                              status: 1,
-                              response: "Notification sent",
-                              message: "Success",
-                            });
-                          }
-                        );
-
+                        getUsertByUID(request.request_initiator_uid, (user) => {
+                          //assign json update
+                          assignRequestToRider(_id, assign_json);
+                          createNotification(
+                            user.device_notification_id,
+                            "You have a new delivery request has been completed",
+                            (notif) => {
+                              console.log("notif", notif);
+                              resp.send({
+                                status: 1,
+                                response: "Notification sent",
+                                message: "Success",
+                              });
+                            }
+                          );
                         });
-                      
-                      }else{
+                      } else {
                         //no rider left on queue
                         resp.send({
                           status: 1,
@@ -262,6 +261,33 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                         });
                       }
                     }
+                  });
+                } else if (status == 4) {
+                  //rider has completed the ride
+                  getRequestById(_id, (request) => {
+                    let assign_json = request.assign_json;
+
+                    assign_json.forEach((rider, i) => {
+                      if (rider.status == 2) {
+                        assign_json[i].status = 4;
+                      }
+                    });
+                    getUsertByUID(next_rider_uid, (rider) => {
+                      //assign json update
+                      assignRequestToRider(_id, assign_json);
+                      createNotification(
+                        rider.device_notification_id,
+                        "You have a new delivery request",
+                        (notif) => {
+                          console.log("notif", notif);
+                          resp.send({
+                            status: 1,
+                            response: "Notification sent",
+                            message: "Success",
+                          });
+                        }
+                      );
+                    });
                   });
                 }
               });
