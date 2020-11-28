@@ -63,7 +63,7 @@ router.get("/getRiderRequests", function (req, resp, next) {
               );
               if (
                 request.assign_json.filter(
-                  (rider) => rider.status == 1 && rider.uid == uid
+                  (rider) => (rider.status == 1 || rider.status == 2) && rider.uid == uid
                 ).length
               ) {
                 rider_request = request;
