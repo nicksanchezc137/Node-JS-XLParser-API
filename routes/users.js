@@ -185,4 +185,46 @@ router.post("/saveUser", async function (req, resp, next) {
   });
 });
 
+
+router.post("/updateUser", async function (req, resp, next) {
+  var user = req.body;
+
+  checkIfExists(user.email, user.phone, (fetched_users, err) => {
+    if (err) {
+      resp.send({
+        status: 0,
+        message: "error occurred fetching user",
+        response: {},
+      });
+      return;
+    }
+    if (fetched_users.length) {
+      resp.send({ status: 0, message: "user already exists!", response: {} });
+      return;
+    }
+    try {
+      mongo.connect(url, function (err, db) {
+        if (err) throw err;
+        var dbo = db.db("xlparser");
+        var myquery = { uid };
+        var newvalues = { $set: { name:user.name,phone:user.phone } };
+        dbo
+          .collection("users")
+          .updateOne(myquery, newvalues, function (err, res) {
+          if (err) throw err;
+          console.log("1 document updated", res);
+          db.close();
+          resp.send({
+            status: 1,
+            response: res.ops[0],
+            message: "User updated!",
+          });
+        });
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  });
+});
+
 module.exports = router;
