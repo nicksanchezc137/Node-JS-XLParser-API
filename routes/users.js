@@ -206,7 +206,7 @@ router.post("/updateUser", async function (req, resp, next) {
       mongo.connect(url, function (err, db) {
         if (err) throw err;
         var dbo = db.db("xlparser");
-        var myquery = { uid };
+        var myquery = { uid:user.uid };
         var newvalues = { $set: { name:user.name,phone:user.phone } };
         dbo
           .collection("users")
