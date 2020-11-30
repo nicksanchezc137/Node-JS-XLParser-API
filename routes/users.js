@@ -212,11 +212,11 @@ router.post("/updateUser", async function (req, resp, next) {
           .collection("users")
           .updateOne(myquery, newvalues, function (err, res) {
           if (err) throw err;
-          console.log("1 document updated", res);
+          console.log("1 document updated");
           db.close();
           resp.send({
             status: 1,
-            response: res.ops[0],
+            response: user,
             message: "User updated!",
           });
         });
