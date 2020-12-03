@@ -40,6 +40,28 @@ router.get("/getRequest", function (req, resp, next) {
     console.log(err);
   }
 });
+/* GET List item*/
+router.get("/getUserRequests", function (req, resp, next) {
+  let uid = req.query.uid;
+  console.log("_id", _id);
+  try {
+    mongo.connect(url, function (err, db) {
+      if (err) throw err;
+      var dbo = db.db("xlparser");
+      dbo
+        .collection("requests")
+        .find({uid })
+        .toArray(function (err, res) {
+          if (err) throw err;
+          console.log(res);
+          resp.send({ message: "Success", status: 1, request: res });
+        });
+    });
+  } catch (err) {
+    console.log(err);
+    resp.send({ message: "Failed", status: 0, request: [] });
+  }
+});
 
 router.get("/getRiderRequests", function (req, resp, next) {
   let uid = req.query.uid;
