@@ -39,10 +39,10 @@ app.use(function (req, res, next) {
 });
 
 //run every 5 minutes
-cron.schedule("*/1 * * * *", () => {
-  console.log("running a task every 5 minutes");
+// cron.schedule("*/1 * * * *", () => {
+//   console.log("running a task every 5 minutes");
 
-});
+// });
 
 // error handler
 app.use(function (err, req, res, next) {
