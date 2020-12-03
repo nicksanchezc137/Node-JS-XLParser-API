@@ -50,7 +50,7 @@ router.get("/getUserRequests", function (req, resp, next) {
       var dbo = db.db("xlparser");
       dbo
         .collection("requests")
-        .find({uid })
+        .find({request_initiator_uid:uid })
         .toArray(function (err, res) {
           if (err) throw err;
           console.log(res);
