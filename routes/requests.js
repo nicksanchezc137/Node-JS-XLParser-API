@@ -43,7 +43,7 @@ router.get("/getRequest", function (req, resp, next) {
 /* GET List item*/
 router.get("/getUserRequests", function (req, resp, next) {
   let uid = req.query.uid;
-  console.log("_id", _id);
+  console.log("uid", uid);
   try {
     mongo.connect(url, function (err, db) {
       if (err) throw err;
