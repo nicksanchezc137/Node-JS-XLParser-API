@@ -241,7 +241,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                           assignRequestToRider(_id, assign_json);
                           createNotification(
                             user.device_notification_id,
-                            "You have a new delivery request has been completed",
+                            "You have a new delivery request",
                             (notif) => {
                               console.log("notif", notif);
                               resp.send({
