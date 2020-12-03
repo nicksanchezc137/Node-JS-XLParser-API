@@ -215,7 +215,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                 "🚀 ~ file: requests.js ~ line 192 ~ updateRequestAssignJSON ~ request",
                 request
               );
-              //send notification if status is okay
+              //send notification to user if status is okay
               getUsertByUID(request.request_initiator_uid, (user) => {
                 if (status == 2) {
                   resp.send({
@@ -258,7 +258,7 @@ router.post("/updateStatusRequest", async function (req, resp, next) {
                         }
                       });
                       if (another_rider_available) {
-                        getUsertByUID(request.request_initiator_uid, (user) => {
+                        getUsertByUID(next_rider_uid, (user) => {
                           //assign json update
                           assignRequestToRider(_id, assign_json);
                           createNotification(
