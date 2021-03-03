@@ -21,7 +21,7 @@
     "node-cron": "^2.0.3",
     "node-xlsx": "^0.15.0",
     "onesignal-node": "^3.2.0",
-    "pug": "2.0.0-beta11",
+    "pug": "3.0.1",
     "read-excel-file": "^4.0.6",
     "uuid": "^8.2.0",
     "xlsx": "^0.16.3"
