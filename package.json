@@ -22,7 +22,7 @@
     "node-xlsx": "^0.15.0",
     "onesignal-node": "^3.2.0",
     "pug": "2.0.0-beta11",
-    "read-excel-file": "^4.0.6",
+    "read-excel-file": "^5.5.1",
     "uuid": "^8.2.0",
     "xlsx": "^0.16.3"
   }
